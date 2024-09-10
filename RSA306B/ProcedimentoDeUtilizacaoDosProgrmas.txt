@@ -1,1 +1,118 @@
+I - Descrição - Versão 3
+
+A medição se inicia com a geração do sinal que será utilizado para irradiação no ambiente escolhido: GeracaoOFDM_SeqPN_v3.py. A premissa é que cada sinal gerado corresponde a uma campanha de medição, o que implica que, a cada geração de um sinal, uma nova estrutura de pasta e arquivos é criada as diversas capturas feitas são colocadas em uma mesma pasta;
+
+A cada geração de um sinal pelo código GeracaoOFDM_SeqPN_v3.py a pasta [_medição_{data1}_{hora1}_] e os arquivos ArqRegistroMedicoes.txt e ArqBaseMedicoes.txt são criados. O arquivo ArqBaseMedicoes.txt é sobrescrito e o arquivo ArqRegistroMedicoes.txt se mantém na pasta anterior, pois contém o registro (log) dos arquivos criados e das diversas medições efetuadas. 
+
+        Laptop                 Laptop                             \/ )) )   )
+GeracaoOFDM_SeqPN_vX.py -->> IQProducer -->> [MG3700] -->> [Tx]___[]  
+
+				  )) )   ) ~~~~~~~~~~{CANAL}~~~~~~~~~~ )) )   )
+
+ )) )   )\/                                      Laptop
+         []___[Rx] -->> [RSA306B] -->> RSA306B_LeituraGrava_OFDM_PDP_v4a.py
+
+
+Após a geração do sinal (GeracaoOFDM_SeqPN_vX.py), o arquivo do sinal é processado (IQProducer) e enviado ao MG3700 para transmissão. O acionamento da captura e apresentação (RSA306B_LeituraGrava_OFDM_PDP_vXa.py)  envia comandos para o RSA306B que realiza a medição do sinal e devolve sinal I e Q que são armazenados em um variável.
+Os arquivos de apoio são carregados automaticamente de modo a identificar os símbolos OFDM, recuperar o trecho de da FFT, dados, realização da autocorrelação PN e apresentar a resposta ao impulso, o perfil de retardo de potência (PDP) e parâmetros de correntes.
+
+II - Estrutura e organização dos arquivos para as medições
+
+A estrutura abaixo, com os arquivos (.py) indicados, devem ser colocados/copiados  no [_Diretório Base_] para a realização das medições:
+
+E:\...
+      \__ [_Nome_Diretório_Base_] 
+      |
+      \__ GeracaoOFDM_SeqPN_v4.py
+      \__ OrganizaPastasArquivosMedicoes.py
+      \__ ArqBaseMedicoes.txt
+      \__ RSA306B_LeituraGrava_OFDM_PDP_v4.py
+      \__ RSA_API.py
+      |
+      (---Arquivos e funções dos programas acima---)
+      |
+	    \__ RSA306B_FuncaoCapturaSinal_v0.py
+	    \__ IdentificaInicioSimbolo_OFDM_v0.py
+	    \__ FormaMatrizes_OFDM_v0.py
+	    \__ Calcula_h_Ph_PDP_APDP_OFDM_v0.py
+	    \__ GraficoRealTime_Exemplo_4_inset_v3.py
+      |
+      (---Outros arquivos de estudo e análise---)
+      |
+      \__ LeituraDadosOFDM_SeqPN_v0.py
+      \__ CalculosSinalOFDM_v0.py
+      \__ SimulaSinalOFDM_v0.py
+      \__ 
+      \__ TransformadaFourier_v0.py
+      \__ 
+      \__ Rotinas_CFAR_Retardo.py
+      \__ cfar.py
+      \__ 
+      \__ FormaAvaliaSinalTeste_OFDM_v0.py
+      \__ RespostaImpulso_Simulacao_v0.py
+      \__ Multipercurso_RuidoSNR_OFDM_v0.py
+      \__ 
+      \__ ListaFuncoesDoPrograma.py
+      \__ CapturaImagemLocal_v0.py
+      \__ 
+      \__ JanelaPerguntaSIM_NAO.py
+      |
+      |
+      (---Arquivos com as medições feitas---)
+      \____ [_medição_{data1}_{hora1}_]
+      \____ ArqRegistroMedicoes.txt
+      \____ ArqRegistroMedicoes.xlsx
+      \____ IQProd_OFDM_2048_1462_56_39_Q.txt
+      \____ Ger_SeqPN_CP_OFDM_1462.pkl
+      \____ Ger_SeqPN_OFDM_1462.npy
+      \____ Ger_Sinal_IQ_OFDM_2048_1462_56_39.npy
+      \____ Ger_Sinal_z1_OFDM_2048_1462_56_39.npy
+      \____ DadosSinal_OFDM_2048_1462_56_39.xlsx
+      \____ IQProd_OFDM_2048_1462_56_39.csv
+      \____ IQProd_OFDM_2048_1462_56_39_I.txt
+      \____ ofdm20481462_5639pav.wvi
+      \____ ofdm20481462_5639pav.wvd
+      \____ RSA306B_Dados_11h17m_OFDM_2048_1462_56_39.pkl
+      \____ RSA306B_Med_11h17m_OFDM_2048_1462_56_39.npy
+
+
+Sequência de execução do processo de medição:
+	1- GeracaoOFDM_SeqPN_v4.py
+	2- RSA306B_LeituraGrava_OFDM_PDP_v4a.py
+	3- Analise_Sinais_Medidos_v6y
+
+
+NOTA:
+Para melhor controle das variáveis, cada programa/código deve ser executado em uma console/terminal distinto
+
+
+O primeiro arquivo a ser executado é o GeracaoOFDM_SeqPN_v4.py que chama o OrganizaPastasArquivosMedicoes.py;
+
+O arquivo OrganizaPastasArquivosMedicoes.py contém funções para organização das pastas e arquivos que são chamados pelo outros arquivos. Ao ser chamado pelo arquivo GeracaoOFDM_SeqPN_v3.py as funções do arquivo OrganizaPastasArquivosMedicoes.py executam, logo no início, as seguintes tarefas:
+
+	· Cria a pasta: [_medição_{data1}_{hora1}_]
+	· Cria o arquivo: ArqBaseMedicoes.txt
+	· Cria o arquivo: ArqRegistroMedicoes.txt
+
+
+A pasta [_medição_{data1}_{hora1}_] é a pasta onde serão armazenados todos os arquivos gerados e necessários no processo de medição;
+
+O arquivo ArqBaseMedicoes.txt contém o nome completo do diretório de medições e um {nome base para os arquivos}:
+	• ...[_Diretório Base_] [_medição_{data1}_{hora1}_]
+	• {nome base para os arquivos}
+
+O arquivo ArqRegistroMedicoes.txt registra o nome de todos os arquivos criados no processo de medição; 
+
+Com base na estrutura apresentada, o primeiro arquivo a ser executado é o GeracaoOFDM_SeqPN_v4.py, que realiza as seguintes tarefas:
+	1- gera um sinal OFDM com os parâmetros especificados
+	2- gera uma sequência PN
+	3- incorpora a sequência PN ao sinal OFDM
+	4- cria os sinais em fase e em quadratura: I e Q
+	5- Armazena/Salva estas variáveis em uma arquivo para correlação futura em Rx
+	6- Armazena/Salva estas variáveis (I e Q) em uma arquivo .txt e .csv para leitura pelo IQProducer e posterior transmissão Tx pelo equipamento MG37xx
+	7- Salva as Salva variáveis de geração do sinal OFDM
+
+
+
+
 
